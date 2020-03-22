@@ -1,0 +1,75 @@
+plugins {
+    id 'com.android.application'
+    id 'kotlin-android'
+    id 'kotlin-android-extensions'
+}
+
+android {
+    compileSdkVersion 29
+    buildToolsVersion "29.0.3"
+
+    defaultConfig {
+        applicationId "io.nekohasekai.fe"
+        minSdkVersion 16
+        targetSdkVersion 29
+        versionCode 1
+        versionName "1.0"
+    }
+
+    packagingOptions {
+
+        exclude '/fabric/**'
+        exclude '/kotlin/**'
+        exclude '/META-INF/*.version'
+        exclude '/META-INF/*.kotlin_module'
+        exclude '/builddef.lst'
+        exclude '/*.txt'
+
+    }
+
+    signingConfigs {
+        def keystorePwd = null
+        def alias = null
+        def pwd = null
+        if (project.rootProject.file('local.properties').exists()) {
+            Properties properties = new Properties()
+            properties.load(project.rootProject.file('local.properties').newDataInputStream())
+            keystorePwd = properties.getProperty("KEYSTORE_PASS")
+            alias = properties.getProperty("ALIAS_NAME")
+            pwd = properties.getProperty("ALIAS_PASS")
+        }
+        release {
+            storeFile project.file('release.jks')
+            storePassword keystorePwd != null ? keystorePwd : System.getenv("KEYSTORE_PASS")
+            keyAlias alias != null ? alias : System.getenv("ALIAS_NAME")
+            keyPassword pwd != null ? pwd : System.getenv("ALIAS_PASS")
+        }
+    }
+
+
+    buildTypes {
+        release {
+            minifyEnabled true
+            signingConfig signingConfigs.release
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+    kotlinOptions {
+        jvmTarget = '1.8'
+    }
+
+}
+
+dependencies {
+
+    implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
+
+    compileOnly 'de.robv.android.xposed:api:82'
+
+}
